@@ -1,0 +1,11 @@
+[package]
+name = "adventofcode"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+rayon = "1.11.0"
+
+[[bin]]
+name = "day"
+path = "src/2025/day7/main.rs"
