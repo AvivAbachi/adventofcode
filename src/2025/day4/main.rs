@@ -28,7 +28,7 @@ fn main() {
 
         for x in 0..rows {
             for y in 0..cols {
-                if grid[x][y] == '@' && cheak_around(&grid, x, y, rows, cols) < 4 {
+                if grid[x][y] == '@' && check_around(&grid, x, y, rows, cols) < 4 {
                     grid[x][y] = '.';
                     count += 1;
                     changed = true;
@@ -44,7 +44,7 @@ fn main() {
     dbg!(&count);
 }
 
-fn cheak_around(grid: &Vec<Vec<char>>, x: usize, y: usize, rows: usize, cols: usize) -> u8 {
+fn check_around(grid: &Vec<Vec<char>>, x: usize, y: usize, rows: usize, cols: usize) -> u8 {
     NEIGHBOR_OFFSETS
         .iter()
         .filter(|&(dx, dy)| {

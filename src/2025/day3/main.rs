@@ -1,7 +1,7 @@
 use std::fs;
 
 fn main() {
-    let mut res: Vec<u128> = vec![];
+    let mut res = vec![];
     fs::read_to_string("src/2025/day3/input.txt")
         .expect("Could not read file")
         .lines()
@@ -11,14 +11,14 @@ fn main() {
             }
         });
 
-    let sum: u128 = res.iter().sum();
+    let sum: u64 = res.iter().sum();
     dbg!(&sum);
 }
 const SIZE: usize = 12;
 
-fn max_num(str: &str) -> u128 {
-    let mut nums: Vec<u32> = vec![];
-    let mut to_remove: usize = str.len() - SIZE;
+fn max_num(str: &str) -> u64 {
+    let mut nums = Vec::with_capacity(SIZE);
+    let mut to_remove = str.len() - SIZE;
 
     for c in str.chars() {
         let n = c.to_digit(10);
@@ -37,10 +37,12 @@ fn max_num(str: &str) -> u128 {
             None => continue,
         }
     }
-    nums.truncate(12);
-    let mut res: u128 = 0;
+
+    nums.truncate(SIZE);
+
+    let mut res: u64 = 0;
     for num in nums {
-        res = res * 10 + num as u128;
+        res = res * 10 + num as u64;
     }
     res
 }
