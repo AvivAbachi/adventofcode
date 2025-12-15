@@ -1,42 +1,77 @@
 use rayon::prelude::*;
 use std::{
+    collections::{HashMap, HashSet, VecDeque},
     fs,
-    sync::atomic::{AtomicU64, Ordering},
 };
+
+type Pos = (usize, usize);
+
 fn main() {
-    let spliter_counter = AtomicU64::new(0);
-    let grid = fs::read_to_string("src/2025/day7/input2.txt").expect("Could not read file");
+    let mut spliter_counter = 0;
+    let grid = fs::read_to_string("src/2025/day7/input.txt").expect("Could not read file");
     let mut grid: Vec<Vec<char>> = grid.par_lines().map(|l| l.chars().collect()).collect();
-
+    let grid2 = grid.clone();
     let start_y = grid[0].iter().position(|&ch| ch == 'S').unwrap();
-    move_on_grid(&mut grid, (1, start_y), &spliter_counter);
-    // print_grid(&grid);
 
-    dbg!(spliter_counter.load(Ordering::Relaxed));
-}
+    let mut qu = VecDeque::new();
+    let mut seen = HashSet::new();
 
-fn move_on_grid(grid: &mut [Vec<char>], (x, y): (usize, usize), spliter_counter: &AtomicU64) {
-    match grid[x][y] {
-        '^' => {
-            spliter_counter.fetch_add(1, Ordering::Relaxed);
-            move_on_grid(grid, (x, y - 1), spliter_counter);
-            move_on_grid(grid, (x, y + 1), spliter_counter)
-        }
-        '.' => {
-            // print_grid(grid);
+    add((1, start_y), &mut qu, &mut seen);
 
-            grid[x][y] = '|';
-            if x + 1 < grid.len() {
-                move_on_grid(grid, (x + 1, y), spliter_counter)
+    while !qu.is_empty() {
+        if let Some(pos) = qu.pop_front() {
+            match grid[pos.0][pos.1] {
+                '.' => {
+                    grid[pos.0][pos.1] = '|';
+                    if pos.0 < grid.len() - 1 {
+                        add((pos.0 + 1, pos.1), &mut qu, &mut seen);
+                    }
+                }
+                '^' => {
+                    spliter_counter += 1;
+                    add((pos.0, pos.1 - 1), &mut qu, &mut seen);
+                    add((pos.0, pos.1 + 1), &mut qu, &mut seen);
+                }
+                _ => {}
             }
         }
-        _ => {}
+    }
+
+    print_grid(&grid);
+
+    dbg!(spliter_counter);
+
+    let mut memo: HashMap<Pos, u64> = HashMap::new();
+    dbg!(timeline((1, start_y), &grid2, &mut memo));
+}
+
+fn timeline(pos: Pos, grid: &[Vec<char>], memo: &mut HashMap<Pos, u64>) -> u64 {
+    if pos.0 >= grid.len() {
+        return 1;
+    }
+
+    if memo.contains_key(&pos) {
+        return memo[&pos];
+    }
+
+    let res = match grid[pos.0][pos.1] {
+        '.' => timeline((pos.0 + 1, pos.1), grid, memo),
+        '^' => timeline((pos.0, pos.1 - 1), grid, memo) + timeline((pos.0, pos.1 + 1), grid, memo),
+        _ => 0,
+    };
+
+    memo.insert(pos, res);
+    res
+}
+
+fn add(pos: Pos, qu: &mut VecDeque<Pos>, seen: &mut HashSet<Pos>) {
+    if !seen.contains(&pos) {
+        qu.push_back(pos);
+        seen.insert(pos);
     }
 }
 
 fn print_grid(grid: &[Vec<char>]) {
-    // thread::sleep(Duration::new(0, 100000000));
-
     let grid: Vec<String> = grid
         .iter()
         .map(|char_vec| char_vec.iter().collect::<String>())
