@@ -8,4 +8,4 @@ rayon = "1.11.0"
 
 [[bin]]
 name = "day"
-path = "src/2025/day8/main.rs"
+path = "src/2025/day9/main.rs"
